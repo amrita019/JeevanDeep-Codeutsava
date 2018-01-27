@@ -1,38 +1,23 @@
-package com.example.amrita.contacts;
+package com.example.amrita.searching;
 
-import android.app.SearchManager;
 import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
+import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.View;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    String[] contactarray = new String[1000];
-    ArrayList<String> obj = new ArrayList<String>();
-
-
-
-
-    int arrcount = 0;
-    ArrayAdapter this_adapter;
-
+    ArrayAdapter<String> adapter;
+    ArrayList<String> arr= new ArrayList<>();
 
 
 
@@ -40,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ListView listView=(ListView) findViewById(R.id.listview);
 
         ContentResolver resolver = getContentResolver();
         Cursor c = getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
@@ -59,26 +45,41 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             String s = name + " " + number;
-            contactarray[arrcount] = s;
-            obj.add(s);
-            arrcount++;
+            arr.add(s);
 
 
-            final ArrayAdapter this_adapter = new ArrayAdapter<String>(this,
-                    R.layout.textview, obj);
+            adapter = new ArrayAdapter<String>(MainActivity.this,R.layout.textview,arr);
+            listView.setAdapter(adapter);
 
-
-            ListView listView = (ListView) findViewById(R.id.list);
-            listView.setAdapter(this_adapter);
             c.moveToNext();
         }
-        }
+
 
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
 
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_search,menu);
+        MenuItem item = menu.findItem(R.id.menuSearch);
+        SearchView searchView = (SearchView)item.getActionView();
 
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
 
+        return super.onCreateOptionsMenu(menu);
 
+    }
+}
